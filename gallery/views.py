@@ -43,12 +43,17 @@ class UploadView(APIView):
 
         uploaded = []
         for f in files:
-            res = cloudinary.uploader.upload(f, resource_type="image")
-            media = MediaFile.objects.create(
+            try:
+                res = cloudinary.uploader.upload(f, resource_type="image")
+                media = MediaFile.objects.create(
                 filename=f.name,
                 url=res["secure_url"]
-            )
-            uploaded.append(media)
+                )
+                uploaded.append(media)
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+        from gallery.management.commands.sync_cloudinary import Command
+        Command().handle()
         serializer = MediaFileSerializer(uploaded, many=True)
         return Response(serializer.data, status=status.HTTP_201_CREATED)

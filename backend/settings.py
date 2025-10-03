@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 import cloudinary
+import cloudinary.uploader
 
 # Load .env file
 load_dotenv()
