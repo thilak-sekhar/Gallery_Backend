@@ -86,6 +86,10 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "https://naphotolu.netlify.app",   # React frontend
 ]
+SESSION_COOKIE_SAMESITE = "None"
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = "None"
+CSRF_COOKIE_SECURE = True
 
 # ✅ Simple password protection
 GALLERY_PASSWORD = os.getenv("GALLERY_PASSWORD", "changeme")
