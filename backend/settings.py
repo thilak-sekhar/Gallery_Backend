@@ -83,7 +83,7 @@ cloudinary.config(
 # ✅ CORS settings
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
-    "https://naphotolu.netlify.app/",   # React frontend
+    "https://naphotolu.netlify.app",   # React frontend
 ]
 
 # ✅ Simple password protection

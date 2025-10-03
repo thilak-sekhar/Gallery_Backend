@@ -37,7 +37,7 @@ class UploadView(APIView):
         if not is_authenticated(request):
             return Response({"error": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        files = request.FILES.getlist("files")
+        files = request.FILES.getlist("images")
         if not files:
             return Response({"error": "No files uploaded"}, status=status.HTTP_400_BAD_REQUEST)
 
