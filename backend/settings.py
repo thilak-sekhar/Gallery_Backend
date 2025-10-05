@@ -92,4 +92,4 @@ CSRF_COOKIE_SAMESITE = "None"
 CSRF_COOKIE_SECURE = True
 
 # ✅ Simple password protection
-GALLERY_PASSWORD = os.getenv("GALLERY_PASSWORD", "fallback-password")
+GALLERY_PASSWORD = os.getenv("GALLERY_PASSWORD")
