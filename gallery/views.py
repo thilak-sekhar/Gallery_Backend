@@ -5,10 +5,13 @@ from rest_framework import status
 from .models import MediaFile
 from .serializers import MediaFileSerializer
 import cloudinary.uploader
+import cloudinary.api
+
 
 # Helper: session check
 def is_authenticated(request):
     return request.session.get("authenticated", False)
+
 
 class UnlockView(APIView):
     def post(self, request):
@@ -19,18 +22,44 @@ class UnlockView(APIView):
             return Response({"message": "Unlocked!"}, status=status.HTTP_200_OK)
         return Response({"error": "Invalid password"}, status=status.HTTP_401_UNAUTHORIZED)
 
+
 class MediaListView(APIView):
+    """
+    Always fetches live images from Cloudinary.
+    Supports pagination via ?cursor=<next_cursor>
+    """
+
     def get(self, request):
         if not is_authenticated(request):
-            return Response({"error": "Unauthorized"}, status=401)
+            return Response({"error": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        # Run sync automatically before returning images
-        from gallery.management.commands.sync_cloudinary import Command
-        Command().handle()
+        try:
+            # pagination support
+            cursor = request.query_params.get("cursor")
 
-        media = MediaFile.objects.order_by("-created_at")
-        serializer = MediaFileSerializer(media, many=True)
-        return Response(serializer.data)
+            result = cloudinary.api.resources(
+                type="upload",
+                resource_type="image",
+                max_results=50,   # change per-page size if needed
+                next_cursor=cursor
+            )
+
+            images = [
+                {
+                    "url": r["secure_url"],
+                    "filename": r["public_id"]
+                }
+                for r in result.get("resources", [])
+            ]
+
+            return Response({
+                "images": images,
+                "next_cursor": result.get("next_cursor")  # frontend can use this for "Load More"
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class UploadView(APIView):
     def post(self, request):
@@ -45,15 +74,14 @@ class UploadView(APIView):
         for f in files:
             try:
                 res = cloudinary.uploader.upload(f, resource_type="image")
+                # save optional record in DB (not required if always pulling from Cloudinary)
                 media = MediaFile.objects.create(
-                filename=f.name,
-                url=res["secure_url"]
+                    filename=f.name,
+                    url=res["secure_url"]
                 )
                 uploaded.append(media)
             except Exception as e:
                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-        from gallery.management.commands.sync_cloudinary import Command
-        Command().handle()
         serializer = MediaFileSerializer(uploaded, many=True)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
