@@ -84,7 +84,7 @@ cloudinary.config(
 # ✅ CORS settings
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
+    "https://naphotolu.netlify.app/",
 ]
 SESSION_COOKIE_SAMESITE = "None"
 SESSION_COOKIE_SECURE = True
