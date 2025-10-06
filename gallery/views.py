@@ -8,9 +8,7 @@ import cloudinary.uploader
 import cloudinary.api
 
 
-# Helper: session check
-def is_authenticated(request):
-    return request.session.get("authenticated", False)
+
 
 
 class UnlockView(APIView):
