@@ -15,12 +15,23 @@ def is_authenticated(request):
 
 class UnlockView(APIView):
     def post(self, request):
-        password = request.data.get("password")
-        if password == "Thilak@Sekhar":
-            request.session["authenticated"] = True
-            request.session.save()
-            return Response({"message": "Unlocked!"}, status=status.HTTP_200_OK)
-        return Response({"error": "Invalid password"}, status=status.HTTP_401_UNAUTHORIZED)
+        try:
+            print("DEBUG: request.data =", request.data)
+            password = request.data.get("password")
+            print("DEBUG: password =", password)
+            print("DEBUG: settings.GALLERY_PASSWORD =", getattr(settings, "GALLERY_PASSWORD", None))
+
+            if password == settings.GALLERY_PASSWORD:
+                request.session["authenticated"] = True
+                request.session.save()
+                return Response({"message": "Unlocked!"}, status=status.HTTP_200_OK)
+
+            return Response({"error": "Invalid password"}, status=status.HTTP_401_UNAUTHORIZED)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return Response({"error": str(e)}, status=500)
+
 
 
 class MediaListView(APIView):
