@@ -21,7 +21,7 @@ class UnlockView(APIView):
             print("DEBUG: password =", password)
             print("DEBUG: settings.GALLERY_PASSWORD =", getattr(settings, "GALLERY_PASSWORD", None))
 
-            if password == settings.GALLERY_PASSWORD:
+            if password == "Thilak@Sekhar":
                 request.session["authenticated"] = True
                 request.session.save()
                 return Response({"message": "Unlocked!"}, status=status.HTTP_200_OK)
